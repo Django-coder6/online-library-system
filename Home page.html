@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Library</title>
+    <style>
+        :root {
+            --body-bg: linear-gradient(
+                to bottom right,
+                #ffffff,
+                #fcf0e6 80%,
+                #f8f4f0
+            );
+            --text-color: black;
+            --book-bg: rgba(255, 255, 255, 0.5);
+            --button-bg: rgba(249, 249, 249, 0.7);
+        }.dark-theme {
+            --body-bg: linear-gradient(
+                  to bottom right,
+                  #000000,
+                  #534a43 80%,
+                  #000000
+              );
+            --text-color: white;
+            --book-bg: rgba(0, 0, 0, 0.5);
+            --button-bg: rgba(6, 6, 6, 0.7);
+        }
+
+        .theme-text{
+            color: var(--text-color);
+        }
+        
+        body {
+            font-family: Arial, sans - serif;
+            margin: 0;
+            min-height: 100vh; 
+            background: var(--body-bg);
+            background-attachment: fixed;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space - between;
+            align-items: center;
+            background-color: rgb(165, 42, 42,0.9);
+            padding: 10px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+        .header button {
+            width: 300px;
+            margin: auto;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            color: brown;
+            font-size: 40px;
+        }
+        .settings-icon {
+            width: 30px;
+            height: 30px;
+            background: url('2d6d4704_E777800_26033bb1.png') no-repeat center center;
+            background-size: contain;
+            cursor: pointer;
+            position: absolute;
+            right: 0px;
+            top: 0%;
+            margin-top: 9px;
+            margin-right: 9px;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+        .book {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translateY(0);
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            background-color: var(--book-bg);
+        }.book:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        }@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+
+        
+
+        button {
+          transition: all 0.2s ease;
+          position: relative;
+          top: 0;
+          background-color: var(--button-bg);
+          border: 1px solid brown;
+        }button:active {
+          top: 2px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          animation: colorFlow 0.4s linear;
+        }
+        
+        .borrowed {
+          background-color: #f8d7da;
+        }
+
+        
+
+        .search-box {
+          width: 200px;
+          padding: 8px;
+          border: 1px solid #ccc;
+          border-radius: 20px;
+          font-size: 14px;
+          position: absolute;
+          right: 110px;
+          top: 50%;
+          transform: translateY(-50%);
+          transition: all 0.4s ease;
+        }.search-box:focus {
+          box-shadow: 10 10 10px rgba(165,42,42,0.3);
+          border-color: brown;
+          outline: none;
+        }
+
+        .theme-toggle {
+          position: absolute;
+          right: 50px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 26px;
+        }.switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: 0.4s;
+          border-radius: 34px;
+        }.slider:before {
+          position: absolute;
+          content: "";
+          height: 20px;
+          width: 20px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: 0.4s;
+          border-radius: 50%;
+        }input:checked + .slider {
+          background-color: #282828;
+        }input:checked + .slider:before {
+          transform: translateX(24px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Online Library - Home Page</h1>
+        <input type="text" class="search-box" id="searchInput" placeholder="Search books...">
+        <div class="theme-toggle">
+          <label class="switch">
+              <input type="checkbox" id="themeToggle">
+              <span class="slider"></span>
+          </label>
+        </div>
+    </div>
+    <div class="settings-icon"  onclick="changeSafety(); window.location.href='setting.html'"></div>
+    </div>
+    <h1 class="theme-text">Library Management - Borrow Books</h1>
+    <div id="book-list" style="text-align: center;">
+    </div>
+
+    
+    <script>
+        let userDatabase = JSON.parse(localStorage.getItem('userDatabase'))||[];
+        console.log(userDatabase);
+        const books = [
+    {
+      id: 1,
+      title: "Harry Potter",
+      description: "Harry Potter is a series of fantasy novels written by British author J.K. Rowling, following the adventures of a young wizard, Harry Potter, at Hogwarts School of Witchcraft and Wizardry.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 2,
+      title: "The Three-Body Problem",
+      description: "The Three-Body Problem is a science fiction novel by Chinese author Liu Ci xin, depicting the contact and conflict between Earth civilization and an alien civilization from the system.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 3,
+      title: "One Hundred Years of Solitude",
+      description: "One Hundred Years of Solitude is a landmark novel by Colombian author Gabriel García Márquez, chronicling the rise and fall of the B family over seven generations.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 4,
+      title: "Animal Farm",
+      description: "Animal Farm is a political allegory by British author George Orwell, using a farm's revolution to satirize Soviet totalitarianism.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 5,
+      title: "The Hunchback of Notre-Dame",
+      description: "The Hunchback of Notre-Dame is a romantic novel by French author Victor Hugo, telling the tragic story of Quasimodo, the bell-ringer of Notre-Dame Cathedral.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 6,
+      title: "The Old Man and the Sea",
+      description: "The Old Man and the Sea is a classic novel by American author Ernest Hemingway, depicting an old Cuban fisherman's struggle with a giant marlin.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 7,
+      title: "Les Misérables",
+      description: "Les Misérables is an epic novel by French author Victor Hugo, exploring the lives and struggles of various characters in French society.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    },
+    {
+      id: 8,
+      title: "Twenty Thousand Leagues Under the Sea",
+      description: "Twenty Thousand Leagues Under the Sea is a science fiction novel by French author Jules Verne, recounting the adventures of Captain Nemo and his submarine, the Nautilus.",
+      borrowed: false,
+      borrowDate: null,
+      dueDate: null
+    }
+  ];
+
+  let isSafe = 0;
+  window.addEventListener('load', () => {
+    isSafe = 0;
+    console.log(isSafe);
+  });
+
+  const currentUsername = localStorage.getItem('currentUsername'); 
+
+  if(currentUsername){
+    console.log(currentUsername ) ;
+  };
+  
+  const bookList = document.getElementById('book-list');
+
+  function renderBooks() {
+    bookList.innerHTML = '';
+    books.forEach(book => {
+      const bookElement = document.createElement('div');
+      bookElement.className = `book ${book.borrowed ? 'borrowed' : ''}`;
+      bookElement.innerHTML = `
+                    <h2 class="theme-text">${book.title}</h2>
+                    <p class="theme-text">${book.description}</p>
+                    ${book.borrowed ?
+        `<p class="theme-text">Borrowed on: ${book.borrowDate}</p>
+         <p class="theme-text">Due date: ${book.dueDate}</p>
+         ${new Date() > book.dueDate ? '<p style="color: red;">Overdue! Please return the book as soon as possible.</p>' : ''}
+         <button class="theme-text" onclick="returnBook(${book.id})">Return Book</button>`
+        : `<button class="theme-text" onclick="borrowBook(${book.id})">Borrow Book</button>`
+      }
+                `;
+      bookList.appendChild(bookElement);
+    });
+  }
+ 
+  
+  // Borrow a book
+  function borrowBook(bookId) {
+    const book = books.find(b => b.id === bookId);
+    const targetUsername = currentUsername ;
+    const targetUser = userDatabase.find(user => user.username === targetUsername);
+    
+     if (book && !book.borrowed) {
+      const today = new Date();
+      const dueDate = new Date();
+      const newBook = { bookid: book, borrowDay:String(today) , returnDay:String(dueDate)};
+
+      dueDate.setDate(today.getDate() + 7);
+
+      book.borrowed = true;
+      book.borrowDate = today;
+      book.dueDate = dueDate;
+
+      console.log(today);
+      console.log(dueDate);
+      
+      renderBooks();
+
+      if (targetUser) {
+  targetUser.borrowedBooks.push(newBook);
+  localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+  console.log("success borrow");
+  
+    }
+  }
+   console.log(userDatabase);
+  }
+
+  // Return a book
+  function returnBook(bookId) {
+    const book = books.find(b => b.id === bookId);
+    const targetUsername = currentUsername ;
+    const targetUser = userDatabase.find(user => user.username === targetUsername);
+    const bookIndex = targetUser.borrowedBooks.findIndex(boOk => boOk.bookid.id === book.id);
+    
+    if (book && book.borrowed) {
+      book.borrowed = false;
+      book.borrowDate = null;
+      book.dueDate = null;
+
+      renderBooks();
+    }
+   
+  if (bookIndex !== -1) {
+    targetUser.borrowedBooks.splice(bookIndex,1);
+ 
+    localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+    console.log("success return");
+    console.log(userDatabase);
+   } else {
+  console.log("fail");
+   }
+  };
+
+  
+
+ function lendBook(bookId,bookborrowDate,bookreturnDate) {
+    const book = books.find(b => b.id === bookId);
+    const targetUsername = currentUsername ;
+    const targetUser = userDatabase.find(user => user.username === targetUsername);
+    
+      book.borrowed = true;
+      book.borrowDate =bookborrowDate;
+      book.dueDate =bookreturnDate;
+      
+      renderBooks();
+    };
+
+//Get account lending information
+targetUsername =localStorage.getItem('currentUsername');
+const targetUser = userDatabase.find(user => user.username === targetUsername);
+if (targetUser){ 
+  const borrowedBookIds = targetUser.borrowedBooks.map(borrowedBook => borrowedBook.bookid.id); 
+  
+ 
+  console.log("Borrowbook array:",borrowedBookIds);
+  for(const book of borrowedBookIds){
+    let borrowDay, returnDay;
+  for (const user of userDatabase) {
+      for (const borrowedBook of user.borrowedBooks) {
+          if (borrowedBook.bookid.id === book) {
+              borrowDate= borrowedBook.borrowDay;
+              returnDate = borrowedBook.returnDay;
+
+              lendBook(book, borrowDate,returnDate);
+          };
+        };
+   
+    
+    
+};
+};
+}
+  
+renderBooks();
+
+function filterBooks(searchTerm) {
+    const filteredBooks = books.filter(book => 
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filteredBooks;
+}
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value;
+    const filteredBooks = filterBooks(searchTerm);
+    renderFilteredBooks(filteredBooks);
+});
+
+function renderFilteredBooks(filteredBooks) {
+    bookList.innerHTML = '';
+    filteredBooks.forEach(book => {
+        const bookElement = document.createElement('div');
+        bookElement.className = `book ${book.borrowed ? 'borrowed' : ''}`;
+        bookElement.innerHTML = `
+            <h2 class="theme-text">${book.title}</h2>
+            <p class="theme-text">${book.description}</p>
+            ${book.borrowed ?
+                `<p class="theme-text">Borrowed on: ${book.borrowDate}</p>
+                 <p class="theme-text">Due date: ${book.dueDate}</p>
+                 ${new Date() > book.dueDate ? '<p style="color: red;">Overdue! Please return the book as soon as possible.</p>' : ''}
+                 <button class="theme-text" onclick="returnBook(${book.id})">Return Book</button>`
+                : `<button class="theme-text" onclick="borrowBook(${book.id})">Borrow Book</button>`
+            }
+        `;
+        bookList.appendChild(bookElement);
+    });
+}
+
+renderFilteredBooks(books);
+
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+themeToggle.addEventListener('change', function() {
+    body.classList.toggle('dark-theme');
+    const theme = body.classList.contains('dark-theme') ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
+});
+
+function changeSafety(){
+    isSafe = -1;
+};
+
+window.addEventListener('beforeunload', function(e) {
+ 
+  if(isSafe != -1){
+      e.preventDefault();
+      e.returnValue = '';
+      localStorage.removeItem('currentUsername');
+    };
+});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF - 8">
+    <meta name="author" content="group36">
+    <title>online library</title>
+    <style>
+        body {
+            font-family: Arial, sans - serif;
+            margin: 0;
+            min-height: 100vh; 
+            background: linear-gradient(
+                to bottom right,
+                #ffffff,
+                #fcf0e6 80%,
+                #f8f4f0
+            );
+            background-attachment: fixed;
+        }
+        
+        #tag1 {
+            color: brown;
+            text-align: center;
+            font-size: 90px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Georgia', serif;
+            margin-bottom: 40px;
+        }
+
+        input {
+            width: 260px;
+            height: 30px;
+        }
+
+        input::placeholder {
+            font-size: large;
+        }
+
+        form {
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 60px;
+            color: brown;
+        }
+
+        #submit_register {
+            width: 70px;
+            height: 30px;
+            color: white;
+            background-color: brown;
+            border-radius: 10px;
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: brown;
+            cursor: pointer;
+
+        }
+       
+    </style>
+</head>
+
+<body>
+    <h1 id="tag1">Online Library<br>system</h1>
+    <div id="loginSection">
+        <form id="loginForm">
+            <input style="margin-bottom:10px;" type="text" id="username" placeholder="username"><br>
+            <input type="password" id="password" placeholder="password"><br>
+            <input type="submit" value="Log in"
+                style="margin-top:10px; color: white ; background-color:brown ; width: 70px ; height: 30px; margin-bottom: 10px; border-radius: 10px;"><br>
+            <button id="goToRegister">No account? register</button>
+        </form>
+    </div>
+    <div id="registerSection" style="display: none; text-align: center;">
+        <h2>registry</h2>
+        <form id="registerForm">
+            <input type="text" style="margin-bottom:10px;" id="registName" placeholder="Username"><br>
+            <input type="password" id="registerPassword" placeholder="password"><br>
+            <input type="password" style="margin-top:10px" id="registerPassword1" placeholder="enter password again"><br>
+            <input type="submit" style="margin-top:10px" id="submit_register" value="register"><br>
+        </form>
+        <button id="goToLogin" >Existing account? Log in</button>
+    </div>
+    <script>
+        let userDatabase = JSON.parse(localStorage.getItem('userDatabase'))||[];
+        let currentUsername = undefined;
+        document.addEventListener('DOMContentLoaded', function () {
+            const registerForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('loginForm');
+            const goToRegister = document.getElementById('goToRegister');
+            const goToLogin = document.getElementById('goToLogin');
+
+            goToRegister.addEventListener('click', function () {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('registerSection').style.display = 'block';
+            });
+
+            goToLogin.addEventListener('click', function () {
+                document.getElementById('registerSection').style.display = 'none';
+                document.getElementById('loginSection').style.display = 'block';
+            });
+
+            registerForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const newUsername = document.getElementById('registName').value;
+                const newPassword = document.getElementById('registerPassword').value;
+                const newpassword1 = document.getElementById('registerPassword1').value;
+                const existingUser = userDatabase.find(function (user) {
+                    return user.username === newUsername;
+                });
+                const regex = /^\d/;
+                if (regex.test(newUsername)) {
+        alert('Usernames cannot start with a number.');
+      }else{if (existingUser) {
+                    alert('The user name already exists.');
+                } else {
+                    if (newPassword === newpassword1) {
+                        const newUser = {
+                            username: newUsername,
+                            password: newPassword,
+                            borrowedBooks:[]
+                        };
+                        userDatabase.push(newUser);
+                        localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+                        alert('Register successfully');
+                        document.getElementById('registerSection').style.display = 'block';
+
+                    } else {
+                        alert('The two passwords are different');
+                        document.getElementById('registerPassword1').value = '';
+                        document.getElementById('registerPassword1').focus();
+                    }
+                }
+            } 
+        });
+
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const logUsername = document.getElementById('username').value;
+                const logPassword = document.getElementById('password').value;
+                const loggedUser = userDatabase.find(function (user) {
+                    return user.username === logUsername && user.password === logPassword;
+                });
+                if (loggedUser) {
+                    window.location.href = 'Home page.html';
+                    const currentUsername = logUsername;
+                    localStorage.setItem('currentUsername',currentUsername);
+                }else{
+                    if (userDatabase.some(function (user) { return user.username === logUsername; })) {
+                        alert('Password error');
+                        document.getElementById('password').value = '';
+                        document.getElementById('password').focus();
+                      
+                       
+                    } 
+                }
+            });
+        });
+        console.log(userDatabase);
+        console.log(currentUsername);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh - CN">
+
+<head>
+    <meta charset="UTF - 8">
+    <meta name="author" content="group36">
+    <title>Online Library - Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans - serif;
+            margin: 0;
+            min-height: 100vh; 
+            background: linear-gradient(
+                to bottom right,
+                #ffffff,
+                #fcf0e6 80%,
+                #f8f4f0
+            );
+            background-attachment: fixed;
+        }
+
+        .settings-container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        div{
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 30%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: brown;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #990000;
+        }
+
+       
+    </style>
+</head>
+
+<body>
+    <div class="settings - container">
+        <h2>Settings</h2>
+        <button id="logoutButton">Log Out</button><br>
+        <button id="deleteAccountButton">Delete Account</button><br>
+        <button id="returnButton">return</button>
+    </div>
+    <script>
+       const currentUsername = localStorage.getItem('currentUsername');   
+       console.log(currentUsername) 
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutButton = document.getElementById('logoutButton');
+            const deleteAccountButton = document.getElementById('deleteAccountButton');
+           
+            logoutButton.addEventListener('click', function () {
+                if(currentUsername){
+                alert('You have logged out successfully.');
+                localStorage.removeItem('currentUsername');
+                window.location.href = 'enter.html';
+            }else{
+                alert('Not log in.');
+            }
+        });
+
+            deleteAccountButton.addEventListener('click', function () {
+                if(currentUsername){
+                let userDatabase = JSON.parse(localStorage.getItem('userDatabase')) || [];
+                const updatedDatabase = userDatabase.filter(user => user.username!== currentUsername);
+                localStorage.setItem('userDatabase', JSON.stringify(updatedDatabase));
+                alert('Your account has been deleted successfully.');
+                localStorage.removeItem('currentUsername');
+                window.location.href = 'enter.html';
+            }else{
+                alert(' Not log in.');
+            };
+        });
+            
+            returnButton.addEventListener('click',function(){
+                history.back();
+            });     
+        
+        
+        
+        
+        });
+    console.log(currentUsername);
+
+window.addEventListener('beforeunload', function(e) {
+
+     e.preventDefault();
+     e.returnValue = '';
+     localStorage.removeItem('currentUsername');
+});
+            
+    </script>
+</body>
+
+</html>
